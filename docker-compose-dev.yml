@@ -23,7 +23,7 @@ services:
       - media:/app/media/
 
   frontend:
-    image: d
+    image: gagarinru/foodgram_frontend
     env_file: .env
     command: cp -r /app/build/. /static/
     volumes:
