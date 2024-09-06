@@ -1,0 +1,2 @@
+PAGE_SIZE = 6
+MIN_VALUE = 1
