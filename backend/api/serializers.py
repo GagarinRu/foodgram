@@ -37,6 +37,7 @@ class UserSerializer(serializers.ModelSerializer):
             'is_subscribed',
             'avatar',
         )
+        read_only_fields = 'is_subscribed',
 
     def create(self, validated_data):
         user = User.objects.create_user(
@@ -45,10 +46,8 @@ class UserSerializer(serializers.ModelSerializer):
         return user.set_password(validated_data('password')).save()
 
     def get_is_subscribed(self, obj):
-        request = self.context.get('request')
-        if request.user.is_authenticated:
-            return False
-        return Follow.objects.filter(id=obj.id).exists()
+        request = self.context['request']
+        return obj.authors.filter(user=request.user.id).exists()
 
 
 class UserAvatarSerializer(serializers.ModelSerializer):
@@ -78,7 +77,7 @@ class IngredientsAddSerializer(serializers.ModelSerializer):
         queryset=Ingredient.objects.all(),
         source='ingredient'
     )
-    amount = serializers.IntegerField()
+    amount = serializers.IntegerField(min_value=MIN_VALUE)
 
     class Meta:
         model = RecipeIngredient
@@ -182,11 +181,6 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 'Нельзя дублировать ингредиенты'
             )
-        for ingredient in ingredients:
-            if ingredient.get('amount') <= 0:
-                raise serializers.ValidationError(
-                    f'Количество ингридиентов не менее {MIN_VALUE}!'
-                )
         return ingredients
 
     def validate_tags(self, tags):
@@ -203,12 +197,12 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
             )
         return tags
 
-    def validate(self, attrs):
-        attrs['ingredients'] = (
-            self.validate_ingredients(attrs.get('ingredients', []))
+    def validate(self, data):
+        data['ingredients'] = (
+            self.validate_ingredients(data.get('ingredients', []))
         )
-        attrs['tags'] = self.validate_tags(attrs.get('tags', []))
-        return attrs
+        data['tags'] = self.validate_tags(data.get('tags', []))
+        return data
 
     def get_ingredients(self, ingredients, recipe):
         for ingredient in ingredients:

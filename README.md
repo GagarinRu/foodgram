@@ -1,13 +1,16 @@
 [![Foodgram workflow](https://github.com/GagarinRu/foodgram/actions/workflows/main.yml/badge.svg)](https://github.com/GagarinRu/foodgram/actions/workflows/main.yml/)
 #  Проект Foodgram
 
+Сайт проекта: https://gagarinfoodgram.zapto.org/
+
+Логин суперадмина: admin@admin.ru
+Пароль суперадмина: admin
+
 ## Описание
-'''
+
 Данный проект проект «Фудграм» предоставляет возможность пользователям публиковать свои рецепты, добавлять чужие рецепты в избранное и подписываться на публикации других авторов.
-'''
 
 ## Реализованный стек со следующими параметрами:
-'''
 - Django==3.2.3
 - djangorestframework==3.12.4
 - djoser==2.1.0
@@ -17,36 +20,28 @@
 - python-dotenv==1.0.1
 - psycopg2-binary==2.9.3
 - short_url==1.2.2
-'''
 
 ### Как развернуть проект:
 
 *1.Склонировать проект с репозитория на GitHub:*
-*2.Создать в Docker образы foodgram_backend, foodgram_frontend, foodgram_gateway и отправить на Docker Hub:*()
-'''
+
+*2.Создать в Docker образы foodgram_backend, foodgram_frontend, foodgram_gateway и отправить на Docker Hub:*
+
 docker build -t username/foodgram_backend .
-'''
-'''
+
 cd ../backend
-'''
-'''
+
 docker build -t username/foodgram_frontend .
-'''
-'''
+
 cd ../gateway
-'''
-'''
+
 docker build -t username/foodgram_gateway .
-'''
-'''
+
 docker push username/foodgram_backend
-'''
-'''
+
 docker push username/foodgram_frontend
-'''
-'''
+
 docker push username/foodgram_gateway
-'''
 
 *3.Зайти на сервер проекта и очистить диск сервера от лишних данных:*
 
@@ -58,7 +53,7 @@ docker push username/foodgram_gateway
 
 *Полезно будет выполнить команду sudo docker system prune -af: она уберёт все лишние объекты, которые вы могли создать в докере за время выполнения заданий спринта, — неиспользуемые контейнеры, образы и сети.*
 
-*Удалить Gunicorn-сервис (если установлен).
+*Удалить Gunicorn-сервис (если установлен).*
 
 *4.Настроить сервер Nginx для Foodgram так, что все запросы пойдут в Docker, на порт 8000.*
 

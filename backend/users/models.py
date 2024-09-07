@@ -56,10 +56,6 @@ class User(AbstractBaseUser, PermissionsMixin):
         verbose_name='Адрес электронной почты',
         unique=True
     )
-    password = models.CharField(
-        verbose_name='Пароль',
-        max_length=MAX_LENGTH,
-    )
     first_name = models.CharField(
         verbose_name='Имя',
         max_length=MAX_LENGTH,
@@ -68,8 +64,12 @@ class User(AbstractBaseUser, PermissionsMixin):
         verbose_name='Фамилия',
         max_length=MAX_LENGTH,
     )
+    password = models.CharField(
+        verbose_name='Пароль',
+        max_length=MAX_LENGTH,
+    )
     is_superuser = models.BooleanField(default=False)
-    is_staff = models.BooleanField(default=False)
+    is_staff = models.BooleanField(default=True)
 
     class Meta:
         ordering = ('username',)

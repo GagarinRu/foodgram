@@ -1,21 +1,28 @@
 from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import Group
 from django.utils.safestring import mark_safe
 from rest_framework.authtoken.models import TokenProxy
 
-from .models import Ingredient, Favorite, Recipe, Tag, RecipeIngredient
-from users.models import User
+from .models import Ingredient, Favorite, Recipe, Tag, RecipeIngredient, RecipeTag, ShoppingCart
+from users.models import User, Follow
 
 
 class RecipeInline(admin.TabularInline):
     model = RecipeIngredient
+    min_num = 1
     extra = 0
 
+class TagsInline(admin.TabularInline):
+    model = RecipeTag
+    min_num = 1
+    extra = 0
 
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
     inlines = (
         RecipeInline,
+        TagsInline,
     )
     list_display = (
         'name',
@@ -33,15 +40,19 @@ class RecipeAdmin(admin.ModelAdmin):
     list_editable = (
         'author',
         'cooking_time',
+
     )
     search_fields = (
         'name',
         'author',
+
     )
     list_filter = (
-        'author__username',
+        'tags__name',
+
     )
     readonly_fields = ['post_photo']
+    filter_vertical = ('tags',)
 
     @admin.display(description='Теги')
     def get_tags(self, obj):
@@ -73,7 +84,7 @@ class UserAdmin(admin.ModelAdmin):
         'username',
         'email',
         'first_name',
-        'last_name'
+        'last_name',
     )
     list_display_links = (
         'username',
@@ -83,6 +94,7 @@ class UserAdmin(admin.ModelAdmin):
         'first_name',
         'last_name'
     )
+    exclude = ('password',)
     empty_value_display = 'Не задано'
     readonly_fields = ['post_avatar']
 
@@ -115,6 +127,24 @@ class IngredientAdmin(admin.ModelAdmin):
     )
     search_fields = ('name',)
     empty_value_display = 'Не задано'
+
+
+@admin.register(Favorite)
+class FavoriteAdmin(admin.ModelAdmin):
+    list_display = ('user', 'recipe')
+    empty_value_display = 'Нет Информации'
+
+
+@admin.register(ShoppingCart)
+class ShoppingCartAdmin(admin.ModelAdmin):
+    list_display = ('user', 'recipe')
+    empty_value_display = 'Нет Информации'
+
+
+@admin.register(Follow)
+class FollowAdmin(admin.ModelAdmin):
+    list_display = ('user', 'author')
+    empty_value_display = 'Нет Информации'
 
 
 admin.site.unregister(Group)
