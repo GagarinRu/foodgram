@@ -4,7 +4,9 @@ from django.contrib.auth.models import Group
 from django.utils.safestring import mark_safe
 from rest_framework.authtoken.models import TokenProxy
 
-from .models import Ingredient, Favorite, Recipe, Tag, RecipeIngredient, RecipeTag, ShoppingCart
+from .models import (Ingredient, Favorite,
+                     Recipe, Tag, RecipeIngredient,
+                     RecipeTag, ShoppingCart)
 from users.models import User, Follow
 
 
@@ -13,10 +15,12 @@ class RecipeInline(admin.TabularInline):
     min_num = 1
     extra = 0
 
+
 class TagsInline(admin.TabularInline):
     model = RecipeTag
     min_num = 1
     extra = 0
+
 
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
