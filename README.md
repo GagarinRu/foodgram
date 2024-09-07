@@ -1,4 +1,4 @@
-[![Foodgram workflow](https://github.com/GagarinRu/foodgram/actions/workflows/main.yml/badge.svg)](https://github.com/GagarinRu/foodgram/actions/workflows/main.yml/)
+[![Main Foodgram workflow](https://github.com/GagarinRu/foodgram/actions/workflows/main.yml/badge.svg)](https://github.com/GagarinRu/foodgram/actions/workflows/main.yml/)
 #  Проект Foodgram
 
 Сайт проекта: https://gagarinfoodgram.zapto.org/
