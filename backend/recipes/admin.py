@@ -80,7 +80,7 @@ class RecipeAdmin(admin.ModelAdmin):
     def favorite_amount(self, obj):
         return Favorite.objects.filter(recipe=obj).count()
 
-
+@admin.register(User)
 class UserAdmin(BaseUserAdmin):
     list_display = (
         'username',
@@ -178,7 +178,6 @@ class FollowAdmin(admin.ModelAdmin):
     empty_value_display = 'Нет Информации'
 
 
-admin.site.register(User, UserAdmin)
 admin.site.unregister(Group)
 admin.site.unregister(TokenProxy)
 admin.site.empty_value_display = 'Не задано'
