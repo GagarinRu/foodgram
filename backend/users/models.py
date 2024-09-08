@@ -75,7 +75,7 @@ class User(AbstractUser, PermissionsMixin):
         ordering = ('username',)
         verbose_name = 'Пользватель'
         verbose_name_plural = 'Пользователи'
-    
+
     def __str__(self):
         return self.username
 
