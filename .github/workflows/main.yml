@@ -140,9 +140,10 @@ jobs:
           sudo docker compose -f docker-compose-dev.yml down
           sudo docker compose -f docker-compose-dev.yml up -d
           # Выполняет миграции и сбор статики.
-          sudo docker compose -f docker-compose-dev.yml exec backend python manage.py migrate
           sudo docker compose -f docker-compose-dev.yml exec backend python manage.py collectstatic
           sudo docker compose -f docker-compose-dev.yml exec backend cp -r /app/collected_static/. /static/
+          sudo docker compose -f docker-compose-dev.yml exec backend python manage.py makemigrations
+          sudo docker compose -f docker-compose-dev.yml exec backend python manage.py migrate
           sudo docker compose -f docker-compose-dev.yml exec backend python manage.py load_csv
 
   send_message:
