@@ -101,17 +101,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return self.del_favorite_or_cart(request, Favorite, recipe)
 
     @action(
-        detail=True,
-        methods=['post', 'delete'],
-        permission_classes=[IsAuthenticated],
-    )
-    def shopping_cart(self, request, pk):
-        recipe = get_object_or_404(Recipe, pk=pk)
-        if request.method == 'POST':
-            return self.get_favorite_or_cart(request, ShoppingCart, recipe)
-        return self.del_favorite_or_cart(request, ShoppingCart, recipe)
-
-    @action(
         methods=['get'],
         detail=False,
         permission_classes=[IsAuthenticated]
@@ -131,6 +120,17 @@ class RecipeViewSet(viewsets.ModelViewSet):
                                  f', {item["ingredient__measurement_unit"]}')
         response = HttpResponse(shopping_cart, content_type="text")
         return response
+
+    @action(
+        detail=True,
+        methods=['post', 'delete'],
+        permission_classes=[IsAuthenticated],
+    )
+    def shopping_cart(self, request, pk):
+        recipe = get_object_or_404(Recipe, pk=pk)
+        if request.method == 'POST':
+            return self.get_favorite_or_cart(request, ShoppingCart, recipe)
+        return self.del_favorite_or_cart(request, ShoppingCart, recipe)
 
     @action(
         methods=['get'],

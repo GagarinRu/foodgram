@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.models import Group
 from django.utils.safestring import mark_safe
 from rest_framework.authtoken.models import TokenProxy
-
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from .models import (Ingredient, Favorite,
                      Recipe, Tag, RecipeIngredient,
                      RecipeTag, ShoppingCart)
@@ -81,8 +81,7 @@ class RecipeAdmin(admin.ModelAdmin):
         return Favorite.objects.filter(recipe=obj).count()
 
 
-@admin.register(User)
-class UserAdmin(admin.ModelAdmin):
+class UserAdmin(BaseUserAdmin):
     list_display = (
         'username',
         'email',
@@ -92,14 +91,43 @@ class UserAdmin(admin.ModelAdmin):
     list_display_links = (
         'username',
     )
-    search_fields = ('username',)
+    search_fields = ["email"]
     list_filter = (
         'first_name',
         'last_name'
     )
-    exclude = ('password',)
+    ordering = ["email"]
     empty_value_display = 'Не задано'
     readonly_fields = ['post_avatar']
+    fieldsets = [
+        (
+            'Данные для входа',
+            {'fields': ['email', 'password']}
+        ),
+        (
+            'Персональная информация',
+            {'fields': ['username', 'first_name', 'last_name']}
+        ),
+        (
+            'Права доступа',
+            {'fields': ['is_active', 'is_superuser', 'is_staff']}
+        ),
+        (
+            'Права редактирования',
+            {'fields': ['user_permissions']}
+        ),
+        (
+            'События посещений',
+            {'fields': ('last_login', 'date_joined')}
+        ),
+    ]
+    add_fieldsets = [
+        (None, {
+            'classes': ('wide',),
+            'fields': ('email', 'username', 'password1', 'password2',),
+        }),
+    ]
+    filter_horizontal = []
 
     @admin.display(description="Аватар")
     def post_avatar(self, obj):
@@ -150,6 +178,7 @@ class FollowAdmin(admin.ModelAdmin):
     empty_value_display = 'Нет Информации'
 
 
+admin.site.register(User, UserAdmin)
 admin.site.unregister(Group)
 admin.site.unregister(TokenProxy)
 admin.site.empty_value_display = 'Не задано'

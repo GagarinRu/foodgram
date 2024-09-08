@@ -1,11 +1,11 @@
 from django.contrib.auth.base_user import BaseUserManager
-from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
+from django.contrib.auth.models import AbstractUser, PermissionsMixin
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.db import models
 from django.db.models import UniqueConstraint
 
 from .constants import MAX_LENGTH
-from .validators import validate_username
+from .validators import validate_username, validate_subscribe_yourself
 
 
 class UserManager(BaseUserManager):
@@ -37,7 +37,7 @@ class UserManager(BaseUserManager):
         )
 
 
-class User(AbstractBaseUser, PermissionsMixin):
+class User(AbstractUser, PermissionsMixin):
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ('username', 'first_name', 'last_name', 'password')
     username = models.CharField(
@@ -75,7 +75,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         ordering = ('username',)
         verbose_name = 'Пользватель'
         verbose_name_plural = 'Пользователи'
-
+    
     def __str__(self):
         return self.username
 
@@ -106,6 +106,9 @@ class Follow(models.Model):
                 name='unique_follow',
             )
         ]
+
+    def clean(self):
+        validate_subscribe_yourself(self)
 
     def __str__(self):
         return f'{self.user} {self.author}'
