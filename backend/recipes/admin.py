@@ -80,6 +80,7 @@ class RecipeAdmin(admin.ModelAdmin):
     def favorite_amount(self, obj):
         return Favorite.objects.filter(recipe=obj).count()
 
+
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
     list_display = (
