@@ -38,7 +38,10 @@ class Command(BaseCommand):
                                     measurement_unit=row_two
                                 )
                             )
-                    model_name.objects.bulk_create(data_list, ignore_conflicts=True)
+                    model_name.objects.bulk_create(
+                        data_list,
+                        ignore_conflicts=True
+                    )
             except Exception as error:
                 self.stdout.write(self.style.ERROR(f'{error}'))
         self.stdout.write(self.style.SUCCESS('Загрузка данных завершена'))
