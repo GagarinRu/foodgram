@@ -1,12 +1,9 @@
 from django.contrib import admin
-from django.contrib.auth.models import Group
 from django.utils.safestring import mark_safe
-from rest_framework.authtoken.models import TokenProxy
-from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+
 from .models import (Ingredient, Favorite,
                      Recipe, Tag, RecipeIngredient,
-                     RecipeTag, ShoppingCart)
-from users.models import User, Follow
+                     ShoppingCart)
 
 
 class RecipeInline(admin.TabularInline):
@@ -15,17 +12,10 @@ class RecipeInline(admin.TabularInline):
     extra = 0
 
 
-class TagsInline(admin.TabularInline):
-    model = RecipeTag
-    min_num = 1
-    extra = 0
-
-
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
     inlines = (
         RecipeInline,
-        TagsInline,
     )
     list_display = (
         'name',
@@ -52,90 +42,31 @@ class RecipeAdmin(admin.ModelAdmin):
     )
     list_filter = (
         'tags__name',
-
     )
-    readonly_fields = ['post_photo']
+    readonly_fields = ('post_photo',)
     filter_vertical = ('tags',)
 
     @admin.display(description='Теги')
-    def get_tags(self, obj):
-        return ', '.join([tag.name for tag in obj.tags.all()])
+    def get_tags(self, recipe):
+        return ', '.join(tag.name for tag in recipe.tags.all())
 
     @admin.display(description='Ингредиенты')
-    def get_ingredients(self, obj):
+    def get_ingredients(self, recipe):
         return ', '.join(
-            [ingredient.name for ingredient in obj.ingredients.all()]
+            ingredient.name for ingredient in recipe.ingredients.all()
         )
 
-    @admin.display(description="Изображение")
-    def post_photo(self, obj):
-        if obj:
-            return mark_safe(f'<img src={obj.image.url}\
-                            \n width="80" height="60">')
-        return 'Не задано'
+    @admin.display(description='Изображение')
+    def post_photo(self, recipe):
+        return mark_safe(
+            f'<img src={recipe.image.url} width="80" height="60">'
+        )
 
     @admin.display(
         description='Добавлений в избранное'
     )
     def favorite_amount(self, obj):
-        return Favorite.objects.filter(recipe=obj).count()
-
-
-@admin.register(User)
-class UserAdmin(BaseUserAdmin):
-    list_display = (
-        'username',
-        'email',
-        'first_name',
-        'last_name',
-    )
-    list_display_links = (
-        'username',
-    )
-    search_fields = ["email"]
-    list_filter = (
-        'first_name',
-        'last_name'
-    )
-    ordering = ["email"]
-    empty_value_display = 'Не задано'
-    readonly_fields = ['post_avatar']
-    fieldsets = [
-        (
-            'Данные для входа',
-            {'fields': ['email', 'password']}
-        ),
-        (
-            'Персональная информация',
-            {'fields': ['username', 'first_name', 'last_name']}
-        ),
-        (
-            'Права доступа',
-            {'fields': ['is_active', 'is_superuser', 'is_staff']}
-        ),
-        (
-            'Права редактирования',
-            {'fields': ['user_permissions']}
-        ),
-        (
-            'События посещений',
-            {'fields': ('last_login', 'date_joined')}
-        ),
-    ]
-    add_fieldsets = [
-        (None, {
-            'classes': ('wide',),
-            'fields': ('email', 'username', 'password1', 'password2',),
-        }),
-    ]
-    filter_horizontal = []
-
-    @admin.display(description="Аватар")
-    def post_avatar(self, obj):
-        if obj:
-            return mark_safe(f'<img src={obj.avatar.url}\
-                            \n width="80" height="60">')
-        return 'Не задано'
+        return obj.favorite_set.count()
 
 
 @admin.register(Tag)
@@ -173,12 +104,4 @@ class ShoppingCartAdmin(admin.ModelAdmin):
     empty_value_display = 'Нет Информации'
 
 
-@admin.register(Follow)
-class FollowAdmin(admin.ModelAdmin):
-    list_display = ('user', 'author')
-    empty_value_display = 'Нет Информации'
-
-
-admin.site.unregister(Group)
-admin.site.unregister(TokenProxy)
 admin.site.empty_value_display = 'Не задано'

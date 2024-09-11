@@ -7,3 +7,4 @@ django-filter==23.1
 python-dotenv==1.0.1
 psycopg2-binary==2.9.3
 short_url==1.2.2
+drf-extra-fields==3.7.0
