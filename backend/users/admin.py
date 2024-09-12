@@ -4,7 +4,6 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.utils.safestring import mark_safe
 from rest_framework.authtoken.models import TokenProxy
 
-
 from .models import User, Follow
 
 
@@ -15,7 +14,7 @@ class UserAdmin(BaseUserAdmin):
         'email',
         'first_name',
         'last_name',
-        'post_avatar',
+        'user_avatar',
     )
     list_display_links = (
         'username',
@@ -27,7 +26,7 @@ class UserAdmin(BaseUserAdmin):
     )
     ordering = ('email',)
     empty_value_display = 'Не задано'
-    readonly_fields = ('post_avatar',)
+    readonly_fields = ('user_avatar',)
     fieldsets = (
         (
             'Данные для входа',
@@ -40,7 +39,7 @@ class UserAdmin(BaseUserAdmin):
                 'first_name',
                 'last_name',
                 'avatar',
-                'post_avatar',
+                'user_avatar',
             )}
         ),
         (
@@ -65,7 +64,7 @@ class UserAdmin(BaseUserAdmin):
     filter_horizontal = ()
 
     @admin.display(description='Аватар')
-    def post_avatar(self, obj):
+    def user_avatar(self, obj):
         if obj.avatar:
             return mark_safe(
                 f'<img src={obj.avatar.url} width="80" height="60">'

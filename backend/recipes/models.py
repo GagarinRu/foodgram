@@ -1,7 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
-from django.db.models import UniqueConstraint
 
 from .constants import (MIN_VALUE, INGREDIENT_LEN, MEASUREMENT_UNIT_LEN,
                         RECIPE_LEN, TAG_LEN, SLICE_LENGTH, MAX_VALUE)
@@ -47,12 +46,12 @@ class Ingredient(models.Model):
         ordering = ('name',)
         verbose_name = 'Ингредиент'
         verbose_name_plural = 'Ингредиенты'
-        constraints = [
-            UniqueConstraint(
-                fields=['name', 'measurement_unit'],
+        constraints = (
+            models.UniqueConstraint(
+                fields=('name', 'measurement_unit',),
                 name='unique_ingredient',
-            )
-        ]
+            ),
+        )
 
     def __str__(self):
         return self.name[:SLICE_LENGTH]
@@ -83,14 +82,14 @@ class Recipe(models.Model):
     )
     cooking_time = models.PositiveSmallIntegerField(
         verbose_name='Время приготовления в минутах',
-        validators=[
+        validators=(
             (MinValueValidator(
                 MIN_VALUE,
                 message=f'Время приготовления не менее {MIN_VALUE}!')),
             (MaxValueValidator(
                 MAX_VALUE,
                 message=f'Время приготовления не более {MAX_VALUE}!'))
-        ],
+        ),
     )
     author = models.ForeignKey(
         User,
@@ -107,12 +106,12 @@ class Recipe(models.Model):
         verbose_name = 'Рецепт'
         verbose_name_plural = 'Рецепты'
         ordering = ('-pub_date',)
-        constraints = [
-            UniqueConstraint(
-                fields=['name', 'author'],
+        constraints = (
+            models.UniqueConstraint(
+                fields=('name', 'author',),
                 name='unique_recipe',
-            )
-        ]
+            ),
+        )
 
     def __str__(self):
         return self.name[:SLICE_LENGTH]
@@ -132,11 +131,12 @@ class RecipeIngredient(models.Model):
 
     amount = models.PositiveIntegerField(
         verbose_name='Количество',
-        validators=[
-            (MinValueValidator(
+        validators=(
+            MinValueValidator(
                 MIN_VALUE,
-                message=f'Количество ингридиентов не менее {MIN_VALUE}!'))
-        ],
+                message=f'Количество ингридиентов не менее {MIN_VALUE}!'
+            ),
+        ),
     )
 
     class Meta:
@@ -144,18 +144,18 @@ class RecipeIngredient(models.Model):
         verbose_name_plural = 'Кол-во ингредиентов в рецепте'
         default_related_name = 'recipeingredient_set'
         ordering = ('ingredient',)
-        constraints = [
-            UniqueConstraint(
-                fields=['recipe', 'ingredient'],
+        constraints = (
+            models.UniqueConstraint(
+                fields=('recipe', 'ingredient',),
                 name='unique_recipeingredient',
-            )
-        ]
+            ),
+        )
 
     def __str__(self):
         return (f'{self.recipe} {self.ingredient}')[:SLICE_LENGTH]
 
 
-class FavoriteShoppingCart(models.Model):
+class UserRecipe(models.Model):
     user = models.ForeignKey(
         User,
         verbose_name='Пользователь',
@@ -170,6 +170,12 @@ class FavoriteShoppingCart(models.Model):
 
     class Meta:
         abstract = True
+        constraints = (
+            models.UniqueConstraint(
+                fields=('user', 'recipe',),
+                name='unique_%(class)s',
+            ),
+        )
 
     def __str__(self):
         return (
@@ -179,30 +185,18 @@ class FavoriteShoppingCart(models.Model):
         )[:SLICE_LENGTH]
 
 
-class Favorite(FavoriteShoppingCart):
+class Favorite(UserRecipe):
 
-    class Meta:
+    class Meta(UserRecipe.Meta):
         ordering = ('id',)
         verbose_name = 'Избранное'
         verbose_name_plural = 'Избранные'
         default_related_name = 'favorite_set'
-        constraints = [
-            UniqueConstraint(
-                fields=['user', 'recipe'],
-                name='unique_favorite',
-            )
-        ]
 
 
-class ShoppingCart(FavoriteShoppingCart):
+class ShoppingCart(UserRecipe):
 
-    class Meta:
+    class Meta(UserRecipe.Meta):
         verbose_name = 'Список Покупок'
         verbose_name_plural = 'Списки Покупок'
         default_related_name = 'shoppingcart_set'
-        constraints = [
-            UniqueConstraint(
-                fields=['user', 'recipe'],
-                name='unique_shopping_cart',
-            )
-        ]

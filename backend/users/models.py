@@ -56,19 +56,19 @@ class Follow(models.Model):
         User,
         verbose_name='Автор',
         on_delete=models.CASCADE,
-        related_name='author_subscriptions'
+        related_name='subscriptions_to_author'
     )
 
     class Meta:
         ordering = ('user',)
         verbose_name = 'Подсписка'
         verbose_name_plural = 'Подписки'
-        constraints = [
+        constraints = (
             UniqueConstraint(
-                fields=['user', 'author'],
+                fields=('user', 'author',),
                 name='unique_follow',
-            )
-        ]
+            ),
+        )
 
     def clean(self):
         validate_subscribe_yourself(self)

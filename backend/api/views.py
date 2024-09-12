@@ -62,7 +62,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             is_in_shopping_cart = user.shoppingcart_set.filter(
                 recipe=OuterRef('pk')
             )
-            return queryset.annotate(
+            queryset.annotate(
                 is_favorited=Exists(is_favorited),
                 is_in_shopping_cart=Exists(is_in_shopping_cart)
             )
@@ -83,21 +83,23 @@ class RecipeViewSet(viewsets.ModelViewSet):
         )
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(
+            serializer.data,
+            status=status.HTTP_201_CREATED
+        )
 
     @staticmethod
     def del_favorite_or_cart(request, model, pk):
-        obj = model.objects.filter(
+        delete_status, _ = model.objects.filter(
             user=request.user,
             recipe=get_object_or_404(Recipe, pk=pk).pk
+        ).delete()
+        return Response(
+            'Рецепт удален',
+            status=status.HTTP_204_NO_CONTENT
+            if delete_status
+            else status.HTTP_400_BAD_REQUEST
         )
-        if obj.exists():
-            obj.delete()
-            return Response(
-                'Рецепт удален',
-                status=status.HTTP_204_NO_CONTENT
-            )
-        return Response(status=status.HTTP_400_BAD_REQUEST)
 
     @action(
         detail=True,
@@ -125,17 +127,17 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @staticmethod
     def shopping_list(ingredients):
-        shopping_list = []
+        shopping_list = ()
         for item in ingredients:
-            shopping_list.append(f'\n{item["ingredient__name"]}'
+            shopping_list.append(f'\n{item["name"]}'
                                  f', {item["amount"]}'
-                                 f', {item["ingredient__measurement_unit"]}')
+                                 f', {item["measurement"]}')
         return shopping_list
 
     @action(
-        methods=['get'],
+        methods=('get',),
         detail=False,
-        permission_classes=[IsAuthenticated]
+        permission_classes=(IsAuthenticated,)
     )
     def download_shopping_cart(self, request):
         user = request.user
@@ -146,14 +148,14 @@ class RecipeViewSet(viewsets.ModelViewSet):
             measurement=F('ingredient__measurement_unit'),
         ).annotate(
             amount=Sum('amount')
-        ).order_by('ingredient__name')
+        ).order_by('name')
         return FileResponse(
             self.shopping_list(ingredients,),
             content_type="text"
         )
 
     @action(
-        methods=['get'],
+        methods=('get',),
         detail=True,
         url_path='get-link',
     )
@@ -163,7 +165,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         short_link = request.build_absolute_uri(
             reverse(
                 'shortlink',
-                kwargs={'short_link': short_link}
+                kwargs={'slug': short_link}
             )
         )
         return Response(
@@ -196,7 +198,7 @@ class UserViewSet(UserViewSet):
     @action(
         detail=False,
         methods=('put',),
-        permission_classes=[IsAuthenticated],
+        permission_classes=(IsAuthenticated,),
         url_path='me/avatar'
     )
     def avatar(self, request):
@@ -218,17 +220,17 @@ class UserViewSet(UserViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
-        methods=['get'],
+        methods=('get',),
         detail=False,
         permission_classes=(IsAuthenticated,)
     )
     def subscriptions(self, request):
         user = request.user
         queryset = User.objects.filter(
-            author_subscriptions__user=user
+            subscriptions_to_author__user=user
         ).annotate(
             recipes_count=Count('recipes')
-        )
+        ).order_by('username')
         pages = self.paginate_queryset(queryset)
         serializer = UserFollowSerializer(
             pages,
@@ -242,14 +244,11 @@ class UserViewSet(UserViewSet):
         methods=('post',),
         permission_classes=(IsAuthenticated,)
     )
-    def subscribe(self, request, **kwargs):
-        author_id = self.kwargs.get('id')
-        user = request.user
-        author = get_object_or_404(User, id=author_id)
+    def subscribe(self, request, id):
         serializer = FollowSerializer(
             data={
-                'user': user.id,
-                'author': author.id
+                'user': request.user.id,
+                'author': get_object_or_404(User, pk=id).id
             },
             context={'request': request}
         )
@@ -261,17 +260,13 @@ class UserViewSet(UserViewSet):
         )
 
     @subscribe.mapping.delete
-    def del_subscribe(self, request, **kwargs):
-        author_id = self.kwargs.get('id')
-        user = request.user
-        author = get_object_or_404(User, id=author_id)
-        follow = Follow.objects.filter(
-            user=user,
-            author=author
+    def del_subscribe(self, request, id):
+        delete_status, _ = Follow.objects.filter(
+            user=request.user,
+            author=get_object_or_404(User, pk=id).id
+        ).delete()
+        return Response(
+            status=status.HTTP_204_NO_CONTENT
+            if delete_status
+            else status.HTTP_400_BAD_REQUEST
         )
-        if not follow.exists():
-            return Response(
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        follow.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)

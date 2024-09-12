@@ -9,7 +9,7 @@ from recipes.views import get_short_link
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('api.urls')),
-    path('s/<slug:short_link>/', get_short_link, name='shortlink'),
+    path('s/<slug:slug>/', get_short_link, name='shortlink'),
 ]
 
 if settings.DEBUG:

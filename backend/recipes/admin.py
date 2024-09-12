@@ -21,7 +21,7 @@ class RecipeAdmin(admin.ModelAdmin):
         'name',
         'author',
         'text',
-        'post_photo',
+        'recipe_photo',
         'cooking_time',
         'get_tags',
         'get_ingredients',
@@ -43,7 +43,7 @@ class RecipeAdmin(admin.ModelAdmin):
     list_filter = (
         'tags__name',
     )
-    readonly_fields = ('post_photo',)
+    readonly_fields = ('recipe_photo',)
     filter_vertical = ('tags',)
 
     @admin.display(description='Теги')
@@ -57,16 +57,18 @@ class RecipeAdmin(admin.ModelAdmin):
         )
 
     @admin.display(description='Изображение')
-    def post_photo(self, recipe):
-        return mark_safe(
-            f'<img src={recipe.image.url} width="80" height="60">'
-        )
+    def recipe_photo(self, recipe):
+        if recipe.image:
+            return mark_safe(
+                f'<img src={recipe.image.url} width="80" height="60">'
+            )
+        return 'Не задано'
 
     @admin.display(
         description='Добавлений в избранное'
     )
-    def favorite_amount(self, obj):
-        return obj.favorite_set.count()
+    def favorite_amount(self, recipe):
+        return recipe.favorite_set.count()
 
 
 @admin.register(Tag)
