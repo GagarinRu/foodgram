@@ -121,7 +121,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
         return (
             request and request.user
-            and obj.subscriptions_to_author.filter(
+            and obj.favorite_set.filter( 
                 user=request.user.id
             ).exists()
         )
@@ -130,7 +130,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
         return (
             request and request.user
-            and obj.subscriptions_to_author.filter(
+            and obj.shoppingcart_set.filter( 
                 user=request.user.id
             ).exists()
         )
