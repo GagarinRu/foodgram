@@ -64,10 +64,10 @@ class UserAdmin(BaseUserAdmin):
     filter_horizontal = ()
 
     @admin.display(description='Аватар')
-    def user_avatar(self, obj):
-        if obj.avatar:
+    def user_avatar(self, user):
+        if user.avatar:
             return mark_safe(
-                f'<img src={obj.avatar.url} width="80" height="60">'
+                f'<img src={user.avatar.url} width="80" height="60">'
             )
         return 'Не задано'
 
