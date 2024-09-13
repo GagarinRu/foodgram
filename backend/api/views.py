@@ -127,7 +127,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @staticmethod
     def shopping_list(ingredients):
-        shopping_list = ()
+        shopping_list = []
         for item in ingredients:
             shopping_list.append(f'\n{item["name"]}'
                                  f', {item["amount"]}'
